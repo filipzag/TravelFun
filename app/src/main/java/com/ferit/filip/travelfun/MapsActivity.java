@@ -118,7 +118,7 @@ geoFire =new GeoFire(ref);
 
                 buildGoogleApiClient();
                 createLocationRequest();
-                displayLocation();
+
 
             }
         }
@@ -177,7 +177,7 @@ displayLocation();
                     @Override
                     public void onSuccess(Location location) {
 
-
+if(location!=null){
                             final double latitude = location.getLatitude();
                             final double longitude = location.getLongitude();
 
@@ -225,7 +225,7 @@ displayLocation();
                             Log.d("EDMTDEV","Can't get your location!");
                         }
 
-                    }
+                    }}
                 });
 
     }
@@ -282,7 +282,7 @@ displayLocation();
         mMap = googleMap;
 
    //kreiranje područja znamenitosti
-
+        getPlacesInfo();
 
         double arrayOfPlaces[][]=new double[placeList.size()][placeList.size()];
 
@@ -468,7 +468,7 @@ displayLocation();
 
 
 
-/*public void getPlacesInfo(){
+public void getPlacesInfo(){
 
     StringRequest stringRequest=new StringRequest(Request.Method.POST,server_url,
             new Response.Listener<String>(){
@@ -480,7 +480,7 @@ displayLocation();
 
                     GsonBuilder builder= new GsonBuilder();
                     Gson gson= builder.create();
-              List<Place> placeListInfo= Arrays.asList(gson.fromJson(response,Place[].class));
+              List <Place> placeListInfo= Arrays.asList(gson.fromJson(response,Place[].class));
 
 
                     Log.d("DEV", String.format("size  in getInfo is: %d ",placeListInfo.size()));
@@ -498,7 +498,7 @@ displayLocation();
 
     MySingleton.getInstance(this).addToRequestQue(stringRequest);
 
-}*/
+}
 
 }
 
