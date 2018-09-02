@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "882622520727",
+    "firebase_url": "https://travelfun-f6f8b.firebaseio.com",
+    "project_id": "travelfun-f6f8b",
+    "storage_bucket": "travelfun-f6f8b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882622520727:android:528fe536aa77d3d7",
+        "android_client_info": {
+          "package_name": "com.ferit.filip.travelfun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "882622520727-31jrkad2urcf4gr0ecbfj6a87n96c07v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ferit.filip.travelfun",
+            "certificate_hash": "f09b3e55930957f6331a018d3c75f77fd3818495"
+          }
+        },
+        {
+          "client_id": "882622520727-bbcp6ub51gp8rddq47g6uk7sm79fqge1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWWqq4Xu1BehKz7QyXgwlTIS7oDas68uM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "882622520727-bbcp6ub51gp8rddq47g6uk7sm79fqge1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
