@@ -97,6 +97,8 @@ geoFire =new GeoFire(ref);
         setUpLocation();
         createLocationCallback();
 
+
+
     }
 
 
@@ -284,79 +286,147 @@ if(location!=null){
    //kreiranje područja znamenitosti
         getPlacesInfo();
 
-        double arrayOfPlaces[][]=new double[placeList.size()][placeList.size()];
-
-        for(int j=0;j<placeList.size();j++){
 
 
-            arrayOfPlaces[0][j]= placeList.get(j).getplaceLongitude();
-
-            arrayOfPlaces[1][j]=placeList.get(j).getplaceLatitude();
-
+        StringRequest stringRequest=new StringRequest(Request.Method.POST,server_url,
+                new Response.Listener<String>(){
 
 
+                    @Override
+                    public void onResponse(String response) {
 
-        }
+
+                        GsonBuilder builder= new GsonBuilder();
+                        Gson gson= builder.create();
+                        placeList= Arrays.asList(gson.fromJson(response,Place[].class));
 
 
-
-        Log.d("DEV", String.format("index is: %d ",arrayOfPlaces.length));
-        GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(45,45),0.5f); ;
-        for(int i=0;i<arrayOfPlaces.length;i++){
-
-            Log.d("DEV", String.format("index is: %d ",i));
-            LatLng znamenitost = new LatLng(arrayOfPlaces[0][i],arrayOfPlaces[1][i]);
-            mMap.addCircle(new CircleOptions()
-                    .center(znamenitost)
-                    .radius(500)
-                    .strokeColor(Color.BLUE)
-                    .fillColor(0x220000FF)
-                    .strokeWidth(5.0f)
-            );
-
-            geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude,znamenitost.longitude),0.5f); // 0.5f=0.5km
-        }
+                        Log.d("DEV", String.format("size  in getInfo is: %d ",placeList.size()));
 
 
 
 
 
+                        Log.d("DEV", String.format("Size in OnMapReady is: %d ",placeList.size()));
+                        double arrayOfPlaces[][]=new double[placeList.size()][placeList.size()];
 
-    // Add GeoQuery listener
+                        for(int j=0;j<placeList.size();j++){
+
+
+                            arrayOfPlaces[0][j]= placeList.get(j).getplaceLongitude();
+
+                            arrayOfPlaces[1][j]=placeList.get(j).getplaceLatitude();
+
+
+
+
+                        }
+
+
+
+                        Log.d("DEV", String.format("index is: %d ",arrayOfPlaces.length));
+                        GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(45,45),0.5f); ;
+                        for(int i=0;i<arrayOfPlaces.length;i++){
+
+                            Log.d("DEV", String.format("index is: %d ",i));
+                            Log.d("DEV", String.format("latitude and longitude is: %f %f",arrayOfPlaces[0][i],arrayOfPlaces[1][i]));
+
+                            LatLng znamenitost = new LatLng(arrayOfPlaces[1][i],arrayOfPlaces[0][i]);
+                            mMap.addCircle(new CircleOptions()
+                                    .center(znamenitost)
+                                    .radius(500)
+                                    .strokeColor(Color.BLUE)
+                                    .fillColor(0x220000FF)
+                                    .strokeWidth(5.0f)
+                            );
+
+                            geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude,znamenitost.longitude),0.5f); // 0.5f=0.5km
+                        }
 
 
 
 
 
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+
+                        // Add GeoQuery listener
+
+
+
+
+
+                        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                            @Override
+                            public void onKeyEntered(String key, GeoLocation location) {
+                                sendNotification("TravelFun",String.format("%s entered area with interesting view",key));
+                            }
+
+                            @Override
+                            public void onKeyExited(String key) {
+
+                            }
+
+                            @Override
+                            public void onKeyMoved(String key, GeoLocation location) {
+
+
+                            }
+
+                            @Override
+                            public void onGeoQueryReady() {
+
+                            }
+
+                            @Override
+                            public void onGeoQueryError(DatabaseError error) {
+
+
+
+                                Log.d("ERROR",""+error);           }
+                        });
+
+
+
+
+
+
+
+
+                    }
+                },new Response.ErrorListener(){
+
+
             @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                sendNotification("TravelFun",String.format("%s entered area with interesting view",key));
+            public void onErrorResponse(VolleyError error) {
+
             }
-
-            @Override
-            public void onKeyExited(String key) {
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-
-
-
-                Log.d("ERROR",""+error);           }
         });
+
+        MySingleton.getInstance(this).addToRequestQue(stringRequest);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -480,10 +550,10 @@ public void getPlacesInfo(){
 
                     GsonBuilder builder= new GsonBuilder();
                     Gson gson= builder.create();
-              List <Place> placeListInfo= Arrays.asList(gson.fromJson(response,Place[].class));
+               placeList= Arrays.asList(gson.fromJson(response,Place[].class));
 
 
-                    Log.d("DEV", String.format("size  in getInfo is: %d ",placeListInfo.size()));
+                    Log.d("DEV", String.format("size  in getInfo is: %d ",placeList.size()));
 
 
                 }
