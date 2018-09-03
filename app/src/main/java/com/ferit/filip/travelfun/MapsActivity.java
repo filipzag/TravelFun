@@ -93,7 +93,6 @@ ref = FirebaseDatabase.getInstance().getReference("myLocation");
 
 geoFire =new GeoFire(ref);
 
-
         setUpLocation();
         createLocationCallback();
 
@@ -284,7 +283,8 @@ if(location!=null){
         mMap = googleMap;
 
    //kreiranje područja znamenitosti
-        getPlacesInfo();
+
+
 
 
 
@@ -324,11 +324,12 @@ if(location!=null){
 
 
 
-                        Log.d("DEV", String.format("index is: %d ",arrayOfPlaces.length));
+
                         GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(45,45),0.5f); ;
+
                         for(int i=0;i<arrayOfPlaces.length;i++){
 
-                            Log.d("DEV", String.format("index is: %d ",i));
+
                             Log.d("DEV", String.format("latitude and longitude is: %f %f",arrayOfPlaces[0][i],arrayOfPlaces[1][i]));
 
                             LatLng znamenitost = new LatLng(arrayOfPlaces[1][i],arrayOfPlaces[0][i]);
@@ -340,7 +341,7 @@ if(location!=null){
                                     .strokeWidth(5.0f)
                             );
 
-                            geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude,znamenitost.longitude),0.5f); // 0.5f=0.5km
+               geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude,znamenitost.longitude),0.5f); // 0.5f=0.5km
                         }
 
 
@@ -351,13 +352,15 @@ if(location!=null){
                         // Add GeoQuery listener
 
 
-
-
-
+                        final GeoQuery finalGeoQuery = geoQuery;
                         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                             @Override
                             public void onKeyEntered(String key, GeoLocation location) {
-                                sendNotification("TravelFun",String.format("%s entered area with interesting view",key));
+                                sendNotification("TravelFun",String.format("%s entered area with interesting view",key),finalGeoQuery.getCenter().latitude,finalGeoQuery.getCenter().longitude);
+                                Log.d("DEV",String.format("centar ovog querya je u lat lng %f %f",   finalGeoQuery.getCenter().latitude,   finalGeoQuery.getCenter().longitude));
+
+
+
                             }
 
                             @Override
@@ -434,7 +437,7 @@ if(location!=null){
 
     }
 
-    private void sendNotification(String title, String content) {
+    private void sendNotification(String title, String content,double queryLatitude,double queryLongitude) {
 
 
         Notification.Builder builder= new Notification.Builder(this)
@@ -442,7 +445,9 @@ if(location!=null){
                 .setContentTitle(title)
                 .setContentText(content);
         NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent=new Intent(this,MapsActivity.class);
+        Intent intent=new Intent(this,PlaceActivity.class);
+        intent.putExtra("LATITUDE",queryLatitude);
+        intent.putExtra("LONGITUDE",queryLongitude);
         PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentIntent);
         Notification notification= builder.build();
@@ -538,37 +543,7 @@ if(location!=null){
 
 
 
-public void getPlacesInfo(){
 
-    StringRequest stringRequest=new StringRequest(Request.Method.POST,server_url,
-            new Response.Listener<String>(){
-
-
-                @Override
-                public void onResponse(String response) {
-
-
-                    GsonBuilder builder= new GsonBuilder();
-                    Gson gson= builder.create();
-               placeList= Arrays.asList(gson.fromJson(response,Place[].class));
-
-
-                    Log.d("DEV", String.format("size  in getInfo is: %d ",placeList.size()));
-
-
-                }
-            },new Response.ErrorListener(){
-
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            });
-
-    MySingleton.getInstance(this).addToRequestQue(stringRequest);
-
-}
 
 }
 
