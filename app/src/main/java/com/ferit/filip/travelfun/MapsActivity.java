@@ -15,9 +15,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,7 +31,8 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -58,6 +61,8 @@ import java.util.List;
 import java.util.Random;
 import java.io.Serializable;
 
+import butterknife.BindView;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
@@ -70,7 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static int UPDATE_INTERVAL = 5000;// 5 SEKUNDI
     private static int DISPLACEMENT = 10;
-NotificationHelper helper;
+//NotificationHelper helper;
 DatabaseReference ref;
 
 GeoFire geoFire;
@@ -81,8 +86,12 @@ private String server_url="http://filipz0203.000webhostapp.com/androidDatabaseSy
 
     private static final int MY_PERMISSION_REQUEST_CODE = 2396;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 5821;
+    FloatingActionButton fabButton;
 
     LocationRequest mLocationRequest = new LocationRequest();
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,18 +100,40 @@ private String server_url="http://filipz0203.000webhostapp.com/androidDatabaseSy
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        fabButton = (FloatingActionButton)findViewById(R.id.fab);
 ref = FirebaseDatabase.getInstance().getReference("myLocation");
 
 geoFire =new GeoFire(ref);
 
         setUpLocation();
         createLocationCallback();
-
+        createFabListener();
 
 
     }
 
+    private void createFabListener() {
+
+
+        fabButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                openReportActivity();
+
+
+            }
+        });
+    }
+
+    private void openReportActivity() {
+
+        Intent intentReport = new Intent(this,ReportPlace.class);
+        intentReport.putExtra("LATITUDE",mLastLocation.getLatitude());
+        intentReport.putExtra("LONGITUDE",mLastLocation.getLongitude());
+        startActivity(intentReport);
+
+    }
 
 
     private void setUpLocation() {
@@ -258,11 +289,11 @@ if(location!=null){
     }
 
     private boolean checkPlayService() {
-        int ResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int ResultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (ResultCode != ConnectionResult.SUCCESS) {
 
-            if (GooglePlayServicesUtil.isUserRecoverableError(ResultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(ResultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            if (GoogleApiAvailability.getInstance().isUserResolvableError(ResultCode)) {
+                GoogleApiAvailability.getInstance().getErrorDialog(this,ResultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
 
 
@@ -330,12 +361,12 @@ if(location!=null){
 
                         GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(45,45),0.5f); ;
 
-                        for(int i=0;i<arrayOfPlaces.length;i++){
+                        for(int i=0;i<arrayOfPlaces.length;i++) {
 
 
-                            Log.d("DEV", String.format("latitude and longitude is: %f %f",arrayOfPlaces[0][i],arrayOfPlaces[1][i]));
+                            Log.d("DEV", String.format("latitude and longitude is: %f %f", arrayOfPlaces[0][i], arrayOfPlaces[1][i]));
 
-                            LatLng znamenitost = new LatLng(arrayOfPlaces[1][i],arrayOfPlaces[0][i]);
+                            LatLng znamenitost = new LatLng(arrayOfPlaces[1][i], arrayOfPlaces[0][i]);
                             mMap.addCircle(new CircleOptions()
                                     .center(znamenitost)
                                     .radius(500)
@@ -344,57 +375,50 @@ if(location!=null){
                                     .strokeWidth(5.0f)
                             );
 
-               geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude,znamenitost.longitude),0.5f); // 0.5f=0.5km
+                            geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 0.5f); // 0.5f=0.5km
+
+
+                            // Add GeoQuery listener
+
+
+                            final GeoQuery finalGeoQuery = geoQuery;
+                            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                                @Override
+                                public void onKeyEntered(String key, GeoLocation location) {
+
+                                    sendNotification("TravelFun", String.format("%s entered area with interesting view", key), finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude);
+
+
+                                    Log.d("DEV", String.format("centar ovog querya je u lat lng %f %f", finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude));
+
+
+                                }
+
+                                @Override
+                                public void onKeyExited(String key) {
+
+                                }
+
+                                @Override
+                                public void onKeyMoved(String key, GeoLocation location) {
+
+
+                                }
+
+                                @Override
+                                public void onGeoQueryReady() {
+
+                                }
+
+                                @Override
+                                public void onGeoQueryError(DatabaseError error) {
+
+
+                                    Log.d("ERROR", "" + error);
+                                }
+                            });
+
                         }
-
-
-
-
-
-
-                        // Add GeoQuery listener
-
-
-                        final GeoQuery finalGeoQuery = geoQuery;
-                        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                            @Override
-                            public void onKeyEntered(String key, GeoLocation location) {
-
-                                sendNotification("TravelFun",String.format("%s entered area with interesting view",key),finalGeoQuery.getCenter().latitude,finalGeoQuery.getCenter().longitude);
-
-
-
-                                Log.d("DEV",String.format("centar ovog querya je u lat lng %f %f",   finalGeoQuery.getCenter().latitude,   finalGeoQuery.getCenter().longitude));
-
-
-
-                            }
-
-                            @Override
-                            public void onKeyExited(String key) {
-
-                            }
-
-                            @Override
-                            public void onKeyMoved(String key, GeoLocation location) {
-
-
-                            }
-
-                            @Override
-                            public void onGeoQueryReady() {
-
-                            }
-
-                            @Override
-                            public void onGeoQueryError(DatabaseError error) {
-
-
-
-                                Log.d("ERROR",""+error);           }
-                        });
-
-
 
 
 
@@ -414,46 +438,18 @@ if(location!=null){
         MySingleton.getInstance(this).addToRequestQue(stringRequest);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     private void sendNotification(String title, String content,double queryLatitude,double queryLongitude) {
 
 
         Notification.Builder builder= new Notification.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.drawable.logo_round)
                 .setContentTitle(title)
                 .setContentText(content);
         NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-        helper= new NotificationHelper(this);
-        Notification.Builder builder2=helper.getFFChannelNotification(title,content);
+        //helper= new NotificationHelper(this);
+      //  Notification.Builder builder2=helper.getFFChannelNotification(title,content);
 
 
 
@@ -464,16 +460,16 @@ if(location!=null){
         intent.putExtra("LONGITUDE",queryLongitude);
         intent.putExtras(bundle);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
         Notification notification= builder.build();
-        builder2.setContentIntent(contentIntent);
+        //builder2.setContentIntent(contentIntent);
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.defaults |= Notification.DEFAULT_SOUND;
 
         manager.notify(new Random().nextInt(),notification);
-        helper.getManager().notify(new Random().nextInt(),builder2.build());
+        //helper.getManager().notify(new Random().nextInt(),builder2.build());
 
 
 
