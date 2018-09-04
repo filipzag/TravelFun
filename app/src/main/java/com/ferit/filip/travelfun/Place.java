@@ -1,6 +1,8 @@
 package com.ferit.filip.travelfun;
 
- public class Place {
+import java.io.Serializable;
+
+public class Place implements Serializable{
 
     double latitude;
     double longitude;

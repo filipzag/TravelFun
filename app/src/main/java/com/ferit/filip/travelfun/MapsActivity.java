@@ -2,6 +2,7 @@ package com.ferit.filip.travelfun;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,11 +51,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
+import java.io.Serializable;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -67,12 +70,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static int UPDATE_INTERVAL = 5000;// 5 SEKUNDI
     private static int DISPLACEMENT = 10;
-
+NotificationHelper helper;
 DatabaseReference ref;
 
 GeoFire geoFire;
 Marker myCurrent;
-List<Place> placeList=new ArrayList<>();
+List<Place> placeList=new ArrayList<>() ;
 
 private String server_url="http://filipz0203.000webhostapp.com/androidDatabaseSync.php";
 
@@ -356,7 +359,11 @@ if(location!=null){
                         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                             @Override
                             public void onKeyEntered(String key, GeoLocation location) {
+
                                 sendNotification("TravelFun",String.format("%s entered area with interesting view",key),finalGeoQuery.getCenter().latitude,finalGeoQuery.getCenter().longitude);
+
+
+
                                 Log.d("DEV",String.format("centar ovog querya je u lat lng %f %f",   finalGeoQuery.getCenter().latitude,   finalGeoQuery.getCenter().longitude));
 
 
@@ -445,18 +452,28 @@ if(location!=null){
                 .setContentTitle(title)
                 .setContentText(content);
         NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
+        helper= new NotificationHelper(this);
+        Notification.Builder builder2=helper.getFFChannelNotification(title,content);
+
+
+
         Intent intent=new Intent(this,PlaceActivity.class);
+        Bundle bundle = new Bundle();
+       bundle.putSerializable("places", (Serializable) placeList);
         intent.putExtra("LATITUDE",queryLatitude);
         intent.putExtra("LONGITUDE",queryLongitude);
-        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
+        intent.putExtras(bundle);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         builder.setContentIntent(contentIntent);
         Notification notification= builder.build();
+        builder2.setContentIntent(contentIntent);
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.defaults |= Notification.DEFAULT_SOUND;
 
         manager.notify(new Random().nextInt(),notification);
-
+        helper.getManager().notify(new Random().nextInt(),builder2.build());
 
 
 
@@ -543,8 +560,10 @@ if(location!=null){
 
 
 
+    }
 
 
-}
+
+
 
 
