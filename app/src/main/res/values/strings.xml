@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">TravelFun</string>
     <string name="title_activity_maps">TravelFun</string>
+    <string name="to_je_ovo">Što je ovo?</string>
+    <string name="odaberite_sliku">Odaberite sliku</string>
+    <string name="znate_li_neke_zanimljivosti_o_ovome_mjestu">Znate li neke zanimljivosti o ovome mjestu?</string>
+    <string name="image">image</string>
+    <string name="po_alji">Pošalji</string>
 </resources>

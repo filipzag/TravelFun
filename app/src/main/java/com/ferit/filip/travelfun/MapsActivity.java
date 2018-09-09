@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.solver.widgets.WidgetContainer;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -32,7 +33,6 @@ import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -63,7 +63,7 @@ import java.io.Serializable;
 
 import butterknife.BindView;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
@@ -72,25 +72,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private FusedLocationProviderClient mLastLocationFusedClient;
     private LocationCallback mLocationCallback;
+    double userSpeed;
+    private static int UPDATE_INTERVAL = 1000;// 1 SEKUNDA
+    private static int DISPLACEMENT = 5;
 
-    private static int UPDATE_INTERVAL = 5000;// 5 SEKUNDI
-    private static int DISPLACEMENT = 10;
-//NotificationHelper helper;
-DatabaseReference ref;
+    //NotificationHelper helper;
+    DatabaseReference ref;
 
-GeoFire geoFire;
-Marker myCurrent;
-List<Place> placeList=new ArrayList<>() ;
+    GeoFire geoFire;
+    Marker myCurrent;
+    List<Place> placeList = new ArrayList<>();
 
-private String server_url="http://filipz0203.000webhostapp.com/androidDatabaseSync.php";
+    private String server_url = "http://filipz0203.000webhostapp.com/androidDatabaseSync.php";
 
     private static final int MY_PERMISSION_REQUEST_CODE = 2396;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 5821;
-    FloatingActionButton fabButton;
 
     LocationRequest mLocationRequest = new LocationRequest();
 
-
+    FloatingActionButton fabButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,21 +100,20 @@ private String server_url="http://filipz0203.000webhostapp.com/androidDatabaseSy
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        fabButton = (FloatingActionButton)findViewById(R.id.fab);
-ref = FirebaseDatabase.getInstance().getReference("myLocation");
 
-geoFire =new GeoFire(ref);
+        ref = FirebaseDatabase.getInstance().getReference("myLocation");
+        fabButton = (FloatingActionButton) findViewById(R.id.fabBtn);
+        geoFire = new GeoFire(ref);
 
         setUpLocation();
         createLocationCallback();
         createFabListener();
 
-
     }
 
     private void createFabListener() {
 
-
+if(fabButton!=null){
         fabButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,15 +122,17 @@ geoFire =new GeoFire(ref);
 
 
             }
-        });
+        });}
     }
 
     private void openReportActivity() {
 
-        Intent intentReport = new Intent(this,ReportPlace.class);
-        intentReport.putExtra("LATITUDE",mLastLocation.getLatitude());
+        Intent intentReport = new Intent(this, ReportPlace.class);
+
+
+        intentReport.putExtra("LATITUDE", mLastLocation.getLatitude());
         intentReport.putExtra("LONGITUDE",mLastLocation.getLongitude());
-        startActivity(intentReport);
+       startActivity(intentReport);
 
     }
 
@@ -173,8 +174,9 @@ geoFire =new GeoFire(ref);
                     // Update UI with location data
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
+                    userSpeed=location.getSpeed();
 
-
+                    Log.d("DEV-callback", String.format("Korisnikova brzina je: %f",userSpeed));
 
 
 displayLocation();
@@ -213,6 +215,8 @@ displayLocation();
                     public void onSuccess(Location location) {
 
 if(location!=null){
+    mLastLocation=location;
+    userSpeed=location.getSpeed();
                             final double latitude = location.getLatitude();
                             final double longitude = location.getLongitude();
 
@@ -359,7 +363,7 @@ if(location!=null){
 
 
 
-                        GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(45,45),0.5f); ;
+                        GeoQuery geoQuery;
 
                         for(int i=0;i<arrayOfPlaces.length;i++) {
 
@@ -375,8 +379,22 @@ if(location!=null){
                                     .strokeWidth(5.0f)
                             );
 
-                            geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 0.5f); // 0.5f=0.5km
+Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
+if(userSpeed<1.75){
 
+
+    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 0.3f); // 0.5f=0.5km
+
+
+
+
+}else {
+
+
+    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 1.0f); // 0.5f=0.5km
+
+
+}
 
                             // Add GeoQuery listener
 
@@ -455,7 +473,7 @@ if(location!=null){
 
         Intent intent=new Intent(this,PlaceActivity.class);
         Bundle bundle = new Bundle();
-       bundle.putSerializable("places", (Serializable) placeList);
+        bundle.putSerializable("places", (Serializable) placeList);
         intent.putExtra("LATITUDE",queryLatitude);
         intent.putExtra("LONGITUDE",queryLongitude);
         intent.putExtras(bundle);
@@ -501,6 +519,8 @@ if(location!=null){
 
 
         mLastLocation=location;
+        userSpeed=location.getSpeed();
+        Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
         displayLocation();
     }
 
