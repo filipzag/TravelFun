@@ -10,4 +10,5 @@ public interface rtfInterface {
 @POST("recieveDataFromApp.php")
 Call <ImageClass> uploadImage(@Field("title")String title,@Field("txt") String txt,@Field("latitude") double lat, @Field("longitude") double lng,@Field("image") String image);
 
+
 }

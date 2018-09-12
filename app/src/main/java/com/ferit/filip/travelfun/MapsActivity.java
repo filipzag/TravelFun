@@ -214,9 +214,9 @@ displayLocation();
                     @Override
                     public void onSuccess(Location location) {
 
-if(location!=null){
-    mLastLocation=location;
-    userSpeed=location.getSpeed();
+        if(location!=null){
+            mLastLocation=location;
+             userSpeed=location.getSpeed();
                             final double latitude = location.getLatitude();
                             final double longitude = location.getLongitude();
 
@@ -379,191 +379,191 @@ if(location!=null){
                                     .strokeWidth(5.0f)
                             );
 
-Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
-if(userSpeed<1.75){
+                    Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
+                if(userSpeed<1.75){
 
 
-    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 0.3f); // 0.5f=0.5km
-
-
-
-
-}else {
-
-
-    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 1.0f); // 0.5f=0.5km
-
-
-}
-
-                            // Add GeoQuery listener
-
-
-                            final GeoQuery finalGeoQuery = geoQuery;
-                            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                                @Override
-                                public void onKeyEntered(String key, GeoLocation location) {
-
-                                    sendNotification("TravelFun", String.format("%s entered area with interesting view", key), finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude);
-
-
-                                    Log.d("DEV", String.format("centar ovog querya je u lat lng %f %f", finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude));
-
-
-                                }
-
-                                @Override
-                                public void onKeyExited(String key) {
-
-                                }
-
-                                @Override
-                                public void onKeyMoved(String key, GeoLocation location) {
-
-
-                                }
-
-                                @Override
-                                public void onGeoQueryReady() {
-
-                                }
-
-                                @Override
-                                public void onGeoQueryError(DatabaseError error) {
-
-
-                                    Log.d("ERROR", "" + error);
-                                }
-                            });
-
-                        }
+                    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 0.3f); // 0.5f=0.5km
 
 
 
+
+                }else {
+
+
+                    geoQuery = geoFire.queryAtLocation(new GeoLocation(znamenitost.latitude, znamenitost.longitude), 1.0f); // 0.5f=0.5km
+
+
+                }
+
+                                            // Add GeoQuery listener
+
+
+                                            final GeoQuery finalGeoQuery = geoQuery;
+                                            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                                                @Override
+                                                public void onKeyEntered(String key, GeoLocation location) {
+
+                                                    sendNotification("TravelFun", String.format("%s entered area with interesting view", key), finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude);
+
+
+                                                    Log.d("DEV", String.format("centar ovog querya je u lat lng %f %f", finalGeoQuery.getCenter().latitude, finalGeoQuery.getCenter().longitude));
+
+
+                                                }
+
+                                                @Override
+                                                public void onKeyExited(String key) {
+
+                                                }
+
+                                                @Override
+                                                public void onKeyMoved(String key, GeoLocation location) {
+
+
+                                                }
+
+                                                @Override
+                                                public void onGeoQueryReady() {
+
+                                                }
+
+                                                @Override
+                                                public void onGeoQueryError(DatabaseError error) {
+
+
+                                                    Log.d("ERROR", "" + error);
+                                                }
+                                            });
+
+                                        }
+
+
+
+
+
+
+                                    }
+                                },new Response.ErrorListener(){
+
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                            }
+                        });
+
+                        MySingleton.getInstance(this).addToRequestQue(stringRequest);
+
+
+                    }
+
+                    private void sendNotification(String title, String content,double queryLatitude,double queryLongitude) {
+
+
+                        Notification.Builder builder= new Notification.Builder(this)
+                                .setSmallIcon(R.drawable.logo_round)
+                                .setContentTitle(title)
+                                .setContentText(content);
+                        NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
+                        //helper= new NotificationHelper(this);
+                      //  Notification.Builder builder2=helper.getFFChannelNotification(title,content);
+
+
+
+                        Intent intent=new Intent(this,PlaceActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("places", (Serializable) placeList);
+                        intent.putExtra("LATITUDE",queryLatitude);
+                        intent.putExtra("LONGITUDE",queryLongitude);
+                        intent.putExtras(bundle);
+
+                        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+                        builder.setContentIntent(contentIntent);
+                        Notification notification= builder.build();
+                        //builder2.setContentIntent(contentIntent);
+
+                        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+                        notification.defaults |= Notification.DEFAULT_SOUND;
+
+                        manager.notify(new Random().nextInt(),notification);
+                        //helper.getManager().notify(new Random().nextInt(),builder2.build());
 
 
 
                     }
-                },new Response.ErrorListener(){
 
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
+                    @Override
+                    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+                        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            }
-        });
+                        switch (requestCode){
 
-        MySingleton.getInstance(this).addToRequestQue(stringRequest);
-
-
-    }
-
-    private void sendNotification(String title, String content,double queryLatitude,double queryLongitude) {
+                            case MY_PERMISSION_REQUEST_CODE:
+                                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
 
 
-        Notification.Builder builder= new Notification.Builder(this)
-                .setSmallIcon(R.drawable.logo_round)
-                .setContentTitle(title)
-                .setContentText(content);
-        NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-        //helper= new NotificationHelper(this);
-      //  Notification.Builder builder2=helper.getFFChannelNotification(title,content);
+                                    if (checkPlayService()) {
+
+                                        buildGoogleApiClient();
+                                        createLocationRequest();
+                                        displayLocation();
+                                    }
+                                }
+                                break;
+                        }}
+
+                    @Override
+                    public void onLocationChanged(Location location) {
 
 
-
-        Intent intent=new Intent(this,PlaceActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("places", (Serializable) placeList);
-        intent.putExtra("LATITUDE",queryLatitude);
-        intent.putExtra("LONGITUDE",queryLongitude);
-        intent.putExtras(bundle);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-        Notification notification= builder.build();
-        //builder2.setContentIntent(contentIntent);
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-
-        manager.notify(new Random().nextInt(),notification);
-        //helper.getManager().notify(new Random().nextInt(),builder2.build());
-
-
-
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode){
-
-            case MY_PERMISSION_REQUEST_CODE:
-                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-
-
-                    if (checkPlayService()) {
-
-                        buildGoogleApiClient();
-                        createLocationRequest();
+                        mLastLocation=location;
+                        userSpeed=location.getSpeed();
+                        Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
                         displayLocation();
                     }
-                }
-                break;
-        }}
 
-    @Override
-    public void onLocationChanged(Location location) {
+                    @Override
+                    public void onStatusChanged(String s, int i, Bundle bundle) {
 
+                    }
 
-        mLastLocation=location;
-        userSpeed=location.getSpeed();
-        Log.d("DEV",String.format("Korisnikova brzina je %f",userSpeed));
-        displayLocation();
-    }
+                    @Override
+                    public void onProviderEnabled(String s) {
 
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
+                    }
 
-    }
+                    @Override
+                    public void onProviderDisabled(String s) {
 
-    @Override
-    public void onProviderEnabled(String s) {
+                    }
 
-    }
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
 
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-        displayLocation();
-        startLocationUpdates();
+                        displayLocation();
+                        startLocationUpdates();
 
 
-    }
+                    }
 
-    private void startLocationUpdates() {
+                    private void startLocationUpdates() {
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            return;
-        }
+                            return;
+                        }
 
-        mLastLocationFusedClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+                        mLastLocationFusedClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
-    }
+                    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
+                    @Override
+                    public void onConnectionSuspended(int i) {
 
-        mGoogleApiClient.connect();
+                        mGoogleApiClient.connect();
 
 
 
