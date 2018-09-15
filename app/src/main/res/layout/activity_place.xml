@@ -25,6 +25,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/likestatus"
     android:textSize="16sp"
+    android:textColor="@color/libraryColorTextBlack"
 
     />
     <ImageView
@@ -40,7 +41,9 @@
         android:textSize="20sp"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
-        android:layout_weight="2"/>
+        android:layout_weight="2"
+        android:textColor="@color/libraryColorTextBlack"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

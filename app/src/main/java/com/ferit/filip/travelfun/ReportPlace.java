@@ -1,9 +1,14 @@
 package com.ferit.filip.travelfun;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telecom.Call;
@@ -32,7 +37,11 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
    @BindView (R.id.choose) Button chooseBtn;
     @BindView (R.id.upload)  Button uploadBtn;
     @BindView  (R.id.preview)  ImageView img;
+    @BindView(R.id.shoot) Button shootBtn;
+    private static final int MY_PERMISSION_REQUEST_CODE = 2396;
+
     private static  final int IMG_REQUEST=777;
+    private static  final int CAMERA_REQUEST=007;
     private Bitmap bitmap;
     double lng,lat;
     @Override
@@ -40,8 +49,10 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_place);
         ButterKnife.bind(this);
+
         chooseBtn.setOnClickListener(this);
         uploadBtn.setOnClickListener(this);
+        shootBtn.setOnClickListener(this);
 
 
         Intent intent=getIntent();
@@ -49,6 +60,21 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
 
         lat =getIntent().getExtras().getDouble("LATITUDE");
         lng =getIntent().getExtras().getDouble("LONGITUDE");
+
+        if(getIntent().hasExtra("PICTURE")){
+
+
+            byte[] shotPic=getIntent().getByteArrayExtra("PICTURE");
+
+            chooseBtn.setEnabled(false);
+
+
+Bitmap shotPicBitmap = BitmapFactory.decodeByteArray(shotPic,0,shotPic.length);
+            img.setImageBitmap(bitmap);
+
+
+        }
+
 
 
     }
@@ -79,11 +105,23 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
             case R.id.upload:
 
                                 uploadImage();
-                Log.d("DEV","grananje u switchu radi");
+
                 break;
 
+            case R.id.shoot:
 
+                Log.d("DEV","grananje u switchu radi");
+                takePicture();
+                break;
         }
+
+    }
+
+    private void takePicture() {
+
+        Intent cameraIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+       startActivityForResult(cameraIntent,CAMERA_REQUEST);
+
 
     }
 
@@ -142,12 +180,27 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
                 bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),path);
                 img.setImageBitmap(bitmap);
                 img.setVisibility(View.VISIBLE);
+
                 uploadBtn.setEnabled(true);
 
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        else if(requestCode==CAMERA_REQUEST && resultCode==RESULT_OK && data!= null){
+
+
+            Log.d("DEV","Prepoznaje camera code");
+
+                bitmap =(Bitmap)data.getExtras().get("data");
+                img.setImageBitmap(bitmap);
+
+            img.setVisibility(View.VISIBLE);
+
+            uploadBtn.setEnabled(true);
+
+
         }
     }
 
@@ -162,4 +215,16 @@ public class ReportPlace extends AppCompatActivity  implements View.OnClickListe
         return Base64.encodeToString(imageByte,Base64.DEFAULT);
 
     }
+
+
+
 }
+
+
+
+
+
+
+
+
+

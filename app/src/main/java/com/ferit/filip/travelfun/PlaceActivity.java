@@ -25,6 +25,7 @@ public class PlaceActivity extends AppCompatActivity {
 
     int id;
     int likes;
+    String likesString;
     FloatingActionButton fab;
     double queryPlaceLatitude;
     double queryPlaceLongitude;
@@ -50,14 +51,15 @@ for(int i=0;i<secondPlaceList.size();i++){
     if(secondPlaceList.get(i).getplaceLongitude()==queryPlaceLongitude && secondPlaceList.get(i).getplaceLatitude()==queryPlaceLatitude){
 
 
-placeName.setText(secondPlaceList.get(i).getName().toString());
-tekst.setText(secondPlaceList.get(i).getTekst().toString());
+        placeName.setText(secondPlaceList.get(i).getName().toString());
+        tekst.setText(secondPlaceList.get(i).getTekst().toString());
         Picasso.get().load(secondPlaceList.get(i).getUrl()).into(placeImage);
-
-        String likesString= secondPlaceList.get(i).getLikes() +" ljudi se sviđa pogled sa ovoga mjesta.";
-likeStatus.setText(likesString);
         id=secondPlaceList.get(i).getId();
         likes=secondPlaceList.get(i).getLikes();
+
+        likesString= likes +" ljudi se sviđa pogled sa ovoga mjesta.";
+likeStatus.setText(likesString);
+
 
     }
 
@@ -102,6 +104,9 @@ createFabListener();
             public void onResponse(Call<LikeClass> call, Response<LikeClass> response) {
                 LikeClass likeClass= response.body();
                 Toast.makeText(PlaceActivity.this,"Server response:"+likeClass.getResponse(),Toast.LENGTH_LONG).show();
+              likes++;
+                likesString= likes +" ljudi se sviđa pogled sa ovoga mjesta.";
+                likeStatus.setText(likesString);
                 fab.setEnabled(false);
             }
 

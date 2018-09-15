@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.solver.widgets.WidgetContainer;
@@ -76,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static int UPDATE_INTERVAL = 1000;// 1 SEKUNDA
     private static int DISPLACEMENT = 5;
 
-    //NotificationHelper helper;
+    NotificationHelper helper;
     DatabaseReference ref;
 
     GeoFire geoFire;
@@ -139,16 +141,16 @@ if(fabButton!=null){
 
     private void setUpLocation() {
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                   if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this, new String[]{
+                ActivityCompat.requestPermissions(this, new String[]{
 
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
 
 
-        } else {
+            } else {
 
             if (checkPlayService()) {
 
@@ -163,7 +165,7 @@ if(fabButton!=null){
     }
 
 
-     private void createLocationCallback(){
+     public void createLocationCallback(){
 
         mLocationCallback = new LocationCallback(){
 
@@ -466,28 +468,36 @@ displayLocation();
                                 .setContentTitle(title)
                                 .setContentText(content);
                         NotificationManager manager= (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-                        //helper= new NotificationHelper(this);
-                      //  Notification.Builder builder2=helper.getFFChannelNotification(title,content);
-
-
-
                         Intent intent=new Intent(this,PlaceActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("places", (Serializable) placeList);
                         intent.putExtra("LATITUDE",queryLatitude);
                         intent.putExtra("LONGITUDE",queryLongitude);
                         intent.putExtras(bundle);
-
                         PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
                         builder.setContentIntent(contentIntent);
+
+                        if(Build.VERSION.SDK_INT > 26){
+
+                            helper= new NotificationHelper(this);
+                              Notification.Builder builder2=helper.getFFChannelNotification(title,content);
+                            builder2.setContentIntent(contentIntent);
+                            helper.getManager().notify(new Random().nextInt(),builder2.build());
+                        }
+
+
+
+
+
+
                         Notification notification= builder.build();
-                        //builder2.setContentIntent(contentIntent);
+
 
                         notification.flags |= Notification.FLAG_AUTO_CANCEL;
                         notification.defaults |= Notification.DEFAULT_SOUND;
 
                         manager.notify(new Random().nextInt(),notification);
-                        //helper.getManager().notify(new Random().nextInt(),builder2.build());
+
 
 
 
@@ -573,7 +583,6 @@ displayLocation();
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-
 
 
     }

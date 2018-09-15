@@ -41,14 +41,27 @@
         android:visibility="gone"
 
         />
+
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/uslikaj_sliku"
+        android:id="@+id/shoot"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/preview"
+        app:layout_constraintBottom_toTopOf="@id/choose"
+        />
  <Button
      android:layout_width="match_parent"
      android:layout_height="wrap_content"
-     android:text="@string/odaberite_sliku"
+     android:text="@string/odaberi_sliku"
      android:id="@+id/choose"
      app:layout_constraintLeft_toLeftOf="parent"
      app:layout_constraintRight_toRightOf="parent"
-     app:layout_constraintTop_toBottomOf="@id/preview"
+     app:layout_constraintTop_toBottomOf="@id/shoot"
      app:layout_constraintBottom_toTopOf="@id/upload"
      />
 

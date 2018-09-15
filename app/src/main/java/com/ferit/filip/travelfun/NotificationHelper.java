@@ -4,9 +4,13 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 @TargetApi(26)
 public class NotificationHelper extends ContextWrapper {
@@ -53,4 +57,9 @@ public class NotificationHelper extends ContextWrapper {
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setAutoCancel(true);
     }
+
+
+
+
+
 }
