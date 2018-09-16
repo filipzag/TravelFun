@@ -477,7 +477,7 @@ displayLocation();
                         PendingIntent contentIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
                         builder.setContentIntent(contentIntent);
 
-                        if(Build.VERSION.SDK_INT > 26){
+                        if(Build.VERSION.SDK_INT > 25){
 
                             helper= new NotificationHelper(this);
                               Notification.Builder builder2=helper.getFFChannelNotification(title,content);
